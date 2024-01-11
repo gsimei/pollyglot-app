@@ -1,50 +1,52 @@
+class OpenAiServiceError < StandardError
+end
 class OpenAiService
   include HTTParty
-  base_uri 'https://api.openai.com/v1/chat/completions'
+
+  attr_reader :api_url, :options, :model, :message
 
   def initialize
-    @headers = {
-      'Authorization' => "Bearer #{ENV['OPENAI_API_KEY']}",
-      'Content-Type' => 'application/json'
+    api_key = Rails.application.credentials.chatgpt_api_key
+    @options = {
+      headers: {
+        'Content-Type' => 'application/json',
+        'Authorization' => "Bearer #{api_key}"
+      }
     }
-    binding.irb
+    @api_url = 'https://api.openai.com/v1/chat/completions'
   end
 
-  def translate(text, target_language)
+  def translate(text, language)
     body = {
       model: 'gpt-4',
-      messages: messages(text, target_language),
-      temperature: 0.3,
+      messages: messages(text, language),
+      temperature: 1.1,
       max_tokens: 150,
-      frequency_penalty: 0.5,
-      presence_penalty: 0.5
-    }.to_json
+    }
 
-    response = self.class.post('/engines/davinci-codex/completions', body: body, headers: @headers)
+    response = HTTParty.post(@api_url, body: body.to_json, headers: @options[:headers], timeout: 10)
 
     if response.success?
-      response.parsed_response['choices'].first['text'].strip
+      response.parsed_response['choices'].first['message']['content'].strip
     else
-      raise "OpenAI Error: #{response.code} #{response.message}"
+      raise OpenAiServiceError, "OpenAI Error: #{response.code} #{response.message}"
     end
   rescue StandardError => e
-    # Handle the exception (log it, notify, etc.)
-    raise e.message
+    raise OpenAiServiceError.new(e.message, e)
   end
 
   private
 
-  def messages(text, target_language)
+  def messages(text, language)
     [
       {
         role: 'system',
-        content: "You will be a translator from the language that you will detect
-                  using your language pattern, for the #{target_language} language."
+        content: "Translate for the #{language} language, i want just the translation"
       },
       {
         role: 'user',
         content: text
       }
-    ].to_json
+    ]
   end
 end
