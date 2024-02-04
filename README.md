@@ -1,24 +1,33 @@
-# README
+# OpenAiService Ruby Repository
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+This repository contains a Ruby service for translating text using the OpenAI GPT-4 model. The service is implemented as part of the PollyGlot AI project.
 
-Things you may want to cover:
+## OpenAiService
 
-* Ruby version
+The `OpenAiService` class is responsible for interacting with the OpenAI API to perform translations. It includes error handling and utilizes the HTTParty gem for making HTTP requests.
 
-* System dependencies
+### Usage
 
-* Configuration
+```ruby
+# Example usage
+service = OpenAiService.new
+translation = service.translate("Hello, how are you?", "French")
+puts "Translated Text: #{translation}"
+```
 
-* Database creation
+### Front-end Project
 
-* Database initialization
+[Pollyglot AI React](https://github.com/gsimei/pollyglot-app-react)
 
-* How to run the test suite
+## API KEY
 
-* Services (job queues, cache servers, search engines, etc.)
+ To make it work, you will need insert your  OpenAI API key using the following command:
 
-* Deployment instructions
+` EDITOR="nano" bin/rails credentials:edit`
 
-* ...
+Then, insert your API key with the variable. `chatgpt_api_key`
+
+## Contributing
+
+Feel free to contribute by opening issues or submitting pull requests. Contributions are always welcome
+
